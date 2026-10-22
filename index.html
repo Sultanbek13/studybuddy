@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>StudyBuddy</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: a single phone-width app column on graph paper, tab bar pinned to the bottom */
+:root{
+  --paper:#F5F8FC; --grid:#E1E9F4; --card:#FFFFFF; --ink:#13213A; --muted:#5D6B82; --line:#D5DEEA;
+  --accent:#2453E6; --accent-soft:#E3EAFF; --mark:#FFE14D; --mark-ink:#3A2E00; --good:#14845A; --fire:#E2531F;
+  --display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --body:"Figtree", -apple-system, "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0E1524; --grid:#16203A; --card:#16203A; --ink:#E8EEF8; --muted:#97A3B8; --line:#26324D;
+  --accent:#7B9BFF; --accent-soft:#1F2C55; --mark:#FFE14D; --mark-ink:#3A2E00; --good:#4CC995; --fire:#FF7A45; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0E1524; --grid:#16203A; --card:#16203A; --ink:#E8EEF8; --muted:#97A3B8; --line:#26324D;
+  --accent:#7B9BFF; --accent-soft:#1F2C55; --mark:#FFE14D; --mark-ink:#3A2E00; --good:#4CC995; --fire:#FF7A45; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:24px 24px;}
+.app{max-width:440px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 104px}
+h1,h2{font-family:var(--display);margin:0;text-wrap:balance}
+h1{font-size:28px;font-weight:800;letter-spacing:-.01em}
+h2{font-size:19px;font-weight:600}
+.sub{color:var(--muted);margin:4px 0 0}
+.view{display:flex;flex-direction:column;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.row{display:flex;gap:12px}
+.row>*{flex:1;min-width:0}
+.stat{display:flex;align-items:center;gap:12px}
+.stat b{font-family:var(--mono);font-size:26px;display:block;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat small{color:var(--muted)}
+.ico{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;flex:none}
+.ico svg{width:22px;height:22px}
+.mark{background:var(--mark);color:var(--mark-ink);padding:0 4px;border-radius:3px}
+.bar{height:10px;border-radius:6px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:6px;transition:width .4s}
+.btn{font:600 15px var(--body);border:0;border-radius:12px;padding:12px 18px;cursor:pointer;background:var(--accent);color:#fff}
+:root[data-theme="dark"] .btn{color:#0E1524}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn{color:#0E1524}}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn:focus-visible,.chip:focus-visible,.tab:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn:disabled{opacity:.45;cursor:default}
+.goal-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.goal-head span{font-family:var(--mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.tasks{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.task{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.task input{width:20px;height:20px;accent-color:var(--accent);flex:none}
+.task .t{flex:1;min-width:0}
+.task .t div{overflow-wrap:anywhere}
+.task.done .t div{text-decoration:line-through;color:var(--muted)}
+.tag{font-size:12px;color:var(--muted)}
+.del{background:none;border:0;color:var(--muted);cursor:pointer;font-size:20px;line-height:1;padding:4px}
+.add{display:flex;gap:8px;flex-wrap:wrap}
+.add input{flex:1 1 180px;min-width:0}
+input[type=text],select{font:15px var(--body);color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:500 14px var(--body);border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 14px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.chip:disabled{cursor:default;opacity:.6}
+.clock{position:relative;width:240px;height:240px;margin:8px auto}
+.clock svg{width:100%;height:100%;transform:rotate(-90deg)}
+.clock .c{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.clock .time{font-family:var(--mono);font-size:52px;font-weight:700;font-variant-numeric:tabular-nums}
+.clock .lbl{color:var(--muted)}
+.controls{display:flex;justify-content:center;gap:12px}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.toggle input{width:20px;height:20px;accent-color:var(--accent)}
+.lb{display:flex;flex-direction:column;gap:8px;list-style:none;margin:0;padding:0}
+.lb li{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.lb li.me{border-color:var(--accent);background:var(--accent-soft)}
+.lb .rank{font-family:var(--mono);font-weight:700;text-align:center}
+.lb .min{font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums}
+.lb .bar{height:6px;margin-top:6px}
+.subj{display:grid;grid-template-columns:72px 1fr 64px;gap:10px;align-items:center;font-size:14px}
+.subj span:last-child{text-align:right;font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums}
+.avatar{width:72px;height:72px;border-radius:50%;background:var(--mark);color:var(--mark-ink);display:grid;place-items:center;font:800 32px var(--display);margin:0 auto}
+.center{text-align:center}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:13px;color:var(--muted)}
+.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);
+  padding:8px max(16px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.tabs nav{max-width:440px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.tab{background:none;border:0;color:var(--muted);font:500 12px var(--body);display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;border-radius:10px;cursor:pointer}
+.tab svg{width:22px;height:22px}
+.tab[aria-current="page"]{color:var(--accent);background:var(--accent-soft);font-weight:600}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(88px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);
+  padding:10px 16px;border-radius:10px;font-weight:500;max-width:calc(100% - 32px);text-align:center}
+.empty{color:var(--muted);text-align:center;padding:16px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- HOME -->
+  <section class="view" id="v-home">
+    <div>
+      <h1 id="hello">Hi!</h1>
+      <p class="sub" id="left"></p>
+    </div>
+    <div class="row">
+      <div class="card stat">
+        <div class="ico" style="background:color-mix(in srgb,var(--fire) 15%,transparent);color:var(--fire)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 4-3 5.5-3 9a3 3 0 0 0 6 0c0-1.2-.5-2-1-3 2.5 1 5 3.6 5 7a7 7 0 0 1-14 0c0-5.5 5-8 7-13z"/></svg></div>
+        <div><b id="streak">0</b><small>day streak</small></div>
+      </div>
+      <div class="card stat">
+        <div class="ico" style="background:var(--accent-soft);color:var(--accent)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg></div>
+        <div><b id="today">0</b><small>min today</small></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="goal-head"><h2>Daily goal</h2><span id="goaltxt"></span></div>
+      <div class="bar"><i id="goalbar" style="width:0"></i></div>
+      <p class="sub" id="goalnote" style="margin:10px 0 14px"></p>
+      <button class="btn" id="go-focus" type="button">Start focus session</button>
+    </div>
+    <h2>Tasks</h2>
+    <form class="add" id="addform">
+      <input type="text" id="newtask" placeholder="e.g. Solve 10 algebra problems" aria-label="New task">
+      <select id="newsubj" aria-label="Subject"></select>
+      <button class="btn" type="submit">Add</button>
+    </form>
+    <ul class="tasks" id="tasks"></ul>
+  </section>
+
+  <!-- FOCUS -->
+  <section class="view" id="v-focus" hidden>
+    <div>
+      <h1 id="f-title">Focus</h1>
+      <p class="sub" id="f-sub">Pick a subject and stay with it for 25 minutes.</p>
+    </div>
+    <div class="chips" id="subjchips"></div>
+    <div class="clock">
+      <svg viewBox="0 0 240 240"><circle cx="120" cy="120" r="108" fill="none" stroke="var(--line)" stroke-width="12"/>
+        <circle id="ring" cx="120" cy="120" r="108" fill="none" stroke="var(--accent)" stroke-width="12" stroke-linecap="round" stroke-dasharray="678.6" stroke-dashoffset="678.6"/></svg>
+      <div class="c"><div class="time" id="clock">25:00</div><div class="lbl" id="clocklbl">Math</div></div>
+    </div>
+    <div class="controls">
+      <button class="btn ghost" id="reset" type="button">Reset</button>
+      <button class="btn" id="startstop" type="button">Start</button>
+    </div>
+    <div class="card toggle">
+      <label for="demo"><b>Demo speed</b><br><small class="sub">1 second = 1 minute, for presentations</small></label>
+      <input type="checkbox" id="demo">
+    </div>
+    <p class="sub center" id="sessions"></p>
+  </section>
+
+  <!-- FRIENDS -->
+  <section class="view" id="v-friends" hidden>
+    <div>
+      <h1>This week</h1>
+      <p class="sub">Focus minutes among friends. Resets every Monday.</p>
+    </div>
+    <ol class="lb" id="lb"></ol>
+    <button class="btn ghost" id="invite" type="button">Invite a friend</button>
+  </section>
+
+  <!-- PROFILE -->
+  <section class="view" id="v-profile" hidden>
+    <div class="avatar" id="avatar">S</div>
+    <h1 class="center" id="pname">Student</h1>
+    <div class="row">
+      <div class="card stat"><div><b id="best">0</b><small>best streak</small></div></div>
+      <div class="card stat"><div><b id="total">0</b><small>hours total</small></div></div>
+    </div>
+    <div class="card view" style="gap:12px">
+      <h2>Minutes by subject</h2>
+      <div id="bysubj" class="view" style="gap:10px"></div>
+    </div>
+    <div class="card view" style="gap:12px">
+      <h2>Settings</h2>
+      <div class="field"><label for="setname">Your name</label><input type="text" id="setname"></div>
+      <div class="field"><label for="setgoal">Daily goal: <span id="goalval"></span> min</label><input type="range" id="setgoal" min="25" max="180" step="5"></div>
+      <button class="btn ghost" id="resetall" type="button">Reset to example data</button>
+      <p class="sub" id="resetconfirm" hidden>Tap again to confirm. All your tasks and minutes will be replaced.</p>
+    </div>
+  </section>
+</div>
+
+<div class="tabs"><nav aria-label="Main">
+  <button class="tab" data-v="home" aria-current="page" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</button>
+  <button class="tab" data-v="focus" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>Focus</button>
+  <button class="tab" data-v="friends" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Friends</button>
+  <button class="tab" data-v="profile" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Profile</button>
+</nav></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const SUBJECTS=['Math','English','Physics','History','IT'];
+const FRIENDS=[['Aziza',265],['Timur',210],['Madina',150],['Javohir',95]];
+const FOCUS=25, BREAK=5, KEY='studybuddy-v1';
+const example=()=>({name:'Sultanbek',goal:50,streak:4,best:9,today:0,week:180,total:1240,sessions:0,
+  bySubj:{Math:420,English:310,Physics:260,History:130,IT:120},
+  tasks:[{t:'Solve 10 algebra problems',s:'Math',d:false},{t:'Read chapter 4',s:'History',d:false},{t:'Learn 20 new words',s:'English',d:true}]});
+let S; try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){} if(!S||!S.tasks)S=example();
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+let toastT; function toast(m){const t=$('toast');t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2600)}
+
+// navigation
+function show(v){document.querySelectorAll('.view[id^="v-"]').forEach(s=>s.hidden=s.id!=='v-'+v);
+  document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-current',b.dataset.v===v?'page':'false'));
+  window.scrollTo(0,0); render()}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>show(b.dataset.v));
+$('go-focus').onclick=()=>show('focus');
+
+// home
+$('newsubj').innerHTML=SUBJECTS.map(s=>`<option>${s}</option>`).join('');
+$('addform').onsubmit=e=>{e.preventDefault();const v=$('newtask').value.trim();if(!v)return;
+  S.tasks.unshift({t:v,s:$('newsubj').value,d:false});$('newtask').value='';save();render();toast('Task added')};
+$('tasks').onclick=e=>{const li=e.target.closest('li');if(!li)return;const i=+li.dataset.i;
+  if(e.target.matches('input')){S.tasks[i].d=e.target.checked;if(e.target.checked)toast('Nice! Task done')}
+  else if(e.target.matches('.del')){S.tasks.splice(i,1);toast('Task removed')} else return; save();render()};
+
+// focus timer
+let subj='Math', left=FOCUS*60, onBreak=false, timer=null;
+$('subjchips').onclick=e=>{const b=e.target.closest('.chip');if(!b||b.disabled)return;subj=b.dataset.s;render()};
+$('startstop').onclick=()=>{if(timer){clearInterval(timer);timer=null}else timer=setInterval(tick,1000);render()};
+$('reset').onclick=()=>{clearInterval(timer);timer=null;onBreak=false;left=FOCUS*60;render()};
+function tick(){left=Math.max(0,left-($('demo').checked?60:1));
+  if(left===0){clearInterval(timer);timer=null;
+    if(!onBreak){S.today+=FOCUS;S.week+=FOCUS;S.total+=FOCUS;S.bySubj[subj]=(S.bySubj[subj]||0)+FOCUS;S.sessions++;
+      if(S.sessions===1){S.streak++;if(S.streak>S.best)S.best=S.streak}
+      save();toast(`Great job! +${FOCUS} min of ${subj}. Take a 5-minute break.`);onBreak=true;left=BREAK*60}
+    else{onBreak=false;left=FOCUS*60;toast('Break over. Ready for the next round?')}}
+  render()}
+
+// friends
+$('invite').onclick=()=>toast('Your friend code: SB-4821');
+
+// profile
+$('setname').oninput=e=>{S.name=e.target.value.trim()||'Student';save();render()};
+$('setgoal').oninput=e=>{S.goal=+e.target.value;save();render()};
+let armed=false;$('resetall').onclick=()=>{if(!armed){armed=true;$('resetconfirm').hidden=false;return}
+  armed=false;$('resetconfirm').hidden=true;S=example();save();$('setname').value=S.name;render();toast('Example data restored')};
+
+function render(){
+  const open=S.tasks.filter(t=>!t.d).length, pct=Math.min(1,S.today/S.goal);
+  $('hello').textContent=`Hi, ${S.name}`;
+  $('left').textContent=open?`${open} task${open>1?'s':''} left today`:'All tasks done. Well played.';
+  $('streak').textContent=S.streak; $('today').textContent=S.today;
+  $('goaltxt').textContent=`${S.today} / ${S.goal} min`; $('goalbar').style.width=pct*100+'%';
+  const need=Math.ceil(Math.max(0,S.goal-S.today)/FOCUS);
+  $('goalnote').innerHTML=pct>=1?'<span class="mark">Goal reached</span> Your streak is safe today.':`${need} more focus session${need>1?'s':''} to reach today's goal.`;
+  $('tasks').innerHTML=S.tasks.length?S.tasks.map((t,i)=>`<li class="task${t.d?' done':''}" data-i="${i}">
+    <input type="checkbox" id="task-${i}" ${t.d?'checked':''} aria-label="Done">
+    <label class="t" for="task-${i}"><div>${esc(t.t)}</div><span class="tag">${t.s}</span></label>
+    <button class="del" type="button" aria-label="Delete task">×</button></li>`).join(''):'<li class="empty">No tasks yet. Add your first one above.</li>';
+
+  const total=(onBreak?BREAK:FOCUS)*60, busy=!!timer||onBreak;
+  $('subjchips').innerHTML=SUBJECTS.map(s=>`<button type="button" class="chip" data-s="${s}" aria-pressed="${s===subj}" ${busy?'disabled':''}>${s}</button>`).join('');
+  $('clock').textContent=`${String(Math.floor(left/60)).padStart(2,'0')}:${String(left%60).padStart(2,'0')}`;
+  $('clocklbl').textContent=onBreak?'break':subj;
+  $('ring').style.strokeDashoffset=678.6*(left/total);
+  $('ring').style.stroke=onBreak?'var(--good)':'var(--accent)';
+  $('startstop').textContent=timer?'Pause':'Start';
+  $('f-title').textContent=onBreak?'Break time':'Focus';
+  $('f-sub').textContent=onBreak?'Stand up, drink water, look away from the screen.':'Pick a subject and stay with it for 25 minutes.';
+  $('sessions').textContent=`${S.sessions} session${S.sessions===1?'':'s'} completed today`;
+
+  const rows=[...FRIENDS.map(([n,m])=>({n,m})),{n:S.name+' (you)',m:S.week,me:1}].sort((a,b)=>b.m-a.m), top=rows[0].m;
+  $('lb').innerHTML=rows.map((r,i)=>`<li class="${r.me?'me':''}"><span class="rank">${i+1}</span>
+    <div style="min-width:0"><div>${esc(r.n)}</div><div class="bar"><i style="width:${r.m/top*100}%"></i></div></div>
+    <span class="min">${r.m} min</span></li>`).join('');
+
+  $('avatar').textContent=S.name[0].toUpperCase(); $('pname').textContent=S.name;
+  $('best').textContent=S.best; $('total').textContent=(S.total/60).toFixed(1);
+  const mx=Math.max(...Object.values(S.bySubj));
+  $('bysubj').innerHTML=SUBJECTS.map(s=>`<div class="subj"><span>${s}</span><div class="bar"><i style="width:${(S.bySubj[s]||0)/mx*100}%"></i></div><span>${S.bySubj[s]||0} min</span></div>`).join('');
+  $('goalval').textContent=S.goal;
+}
+$('setname').value=S.name; $('setgoal').value=S.goal;
+render();
+</script>
+
+</body>
+</html>
